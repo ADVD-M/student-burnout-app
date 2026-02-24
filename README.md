@@ -25,7 +25,6 @@ cd student_burnout_app
 
 2. Set up virtual environment:
 python -m venv venv
-# Windows: venv\Scripts\activate | Mac/Linux: source venv/bin/activate
 
 3. Install dependencies:
 pip install -r requirements.txt
