@@ -68,6 +68,11 @@ def generate_burnout_logic(df: pd.DataFrame) -> pd.DataFrame:
     sleep_map = {"Good": -50, "Average": 0, "Poor": 50}
     score += df["sleep_quality"].map(sleep_map).fillna(0)
     
+    # Add random noise to make the dataset more realistic and prevent "perfect" 1.0 AUC
+    np.random.seed(42)
+    noise = np.random.normal(0, 15, size=len(df))
+    score += noise
+    
     # Find percentiles to maintain a perfectly balanced 3-class distribution
     low_thresh = np.percentile(score, 33.3)
     high_thresh = np.percentile(score, 66.7)
