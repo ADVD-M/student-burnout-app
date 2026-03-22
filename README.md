@@ -7,6 +7,9 @@ This application uses a Random Forest classification model to predict burnout ri
 
 Disclaimer: This tool is for informational purposes only and is not a substitute for professional mental health advice.
 
+# View the Live App
+[Link to App](https://student-burnout-pred.streamlit.app/)
+
 ## Project Structure
 - app/: Streamlit frontend (Home and sub-pages)
 - chatbot/: AI response engine
