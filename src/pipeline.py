@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import joblib
+import streamlit as st
 
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
@@ -162,11 +163,12 @@ def evaluate_model(pipeline: Pipeline, X_test: pd.DataFrame, y_test: np.ndarray,
     return metrics
 
 def save_model(pipeline: Pipeline, le: LabelEncoder, path: str):
-    joblib.dump({"pipeline": pipeline, "label_encoder": le}, path)
+    joblib.dump({"pipeline": pipeline, "label_encoder": le}, path, compress=3)
     print(f"✅ Model saved to: {path}")
 
 # ── 4. Inference ──────────────────────────────────────────────────────────────
 
+@st.cache_resource
 def load_model(path: str) -> dict:
     return joblib.load(path)
 

@@ -26,12 +26,14 @@ env/
 # ML Models (large files)
 models/*.pkl
 models/*.joblib
+!models/burnout_model.joblib
 models/*.h5
 models/*.pt
 models/*.bin
 
 # Data files (sensitive)
 data/*.csv
+!data/student_mental_health_burnout.csv
 data/*.xlsx
 
 # OS

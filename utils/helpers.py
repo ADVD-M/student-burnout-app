@@ -24,7 +24,7 @@ def get_project_root() -> pathlib.Path:
 
 def get_model_path() -> str:
     """Return the absolute path to the saved model file."""
-    return str(get_project_root() / "models" / "burnout_model.pkl")
+    return str(get_project_root() / "models" / "burnout_model.joblib")
 
 
 def get_data_path(filename: str = "mentalhealth_dataset.csv") -> str:
