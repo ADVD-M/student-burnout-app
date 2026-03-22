@@ -13,7 +13,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 import streamlit as st
 from utils.helpers import get_model_path, model_exists, risk_color, risk_emoji, format_probability
-from src.inference import load_model, predict, build_input_dict
+from src.pipeline import load_model, predict, build_input_dict
 
 # ── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -79,71 +79,61 @@ with st.form("prediction_form", clear_on_submit=False):
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        gender = st.selectbox("Gender", options=["Female", "Male"], index=0)
+        gender = st.selectbox("Gender", options=["Female", "Male", "Other"], index=0)
         age = st.number_input("Age", min_value=17, max_value=40, value=21, step=1)
-        cgpa = st.number_input("CGPA (out of 10.0)", min_value=0.0, max_value=10.0, value=8.0, step=0.1, format="%.1f")
+        cgpa = st.number_input("CGPA", min_value=0.0, max_value=10.0, value=8.0, step=0.1, format="%.2f")
+        attendance_percentage = st.slider("Attendance Percentage (%)", min_value=0.0, max_value=100.0, value=75.0, step=1.0)
 
     with col2:
-        course = st.text_input("Course / Major", value="Engineering", placeholder="e.g. Engineering")
-        year_map = {"Year 1": "Year 1", "Year 2": "Year 2", "Year 3": "Year 3", "Year 4": "Year 4"}
-        year_of_study = st.selectbox("Year of Study", options=list(year_map.keys()), index=1)
-        study_hours = st.slider("Study Hours per Week", min_value=1, max_value=40, value=18)
+        course = st.selectbox("Course / Major", options=["BTech", "BCA", "BSc", "MBA", "MCA", "BBA"], index=0)
+        year = st.selectbox("Year of Study", options=["1st", "2nd", "3rd", "4th", "5th"], index=1)
+        academic_pressure_score = st.slider("Academic Pressure Score (0-10)", 0, 10, 5)
+        internet_quality = st.selectbox("Internet Quality", options=["Good", "Average", "Poor"], index=1)
 
     with col3:
-        academic_engagement = st.slider("Academic Engagement (1=Low, 5=High)", 1, 5, 3)
-        specialist_treatment = st.radio(
-            "Currently receiving specialist treatment?",
-            options=["No", "Yes"], horizontal=True
-        )
-        has_support = st.radio(
-            "Have mental health support access?",
-            options=["No", "Yes"], horizontal=True
-        )
+        financial_stress_score = st.slider("Financial Stress Score (0-10)", 0, 10, 3)
+        social_support_score = st.slider("Social Support Score (0-10)", 0, 10, 7)
+        stress_level = st.selectbox("General Stress Level", options=["Low", "Medium", "High"], index=1)
+        sleep_quality = st.selectbox("Sleep Quality", options=["Good", "Average", "Poor"], index=1)
+
 
     st.divider()
-    st.markdown("#### Mental Health Symptoms")
+    st.markdown("#### Lifestyle & Mental Health Indicators")
     col4, col5 = st.columns(2)
 
     with col4:
-        depression = st.radio("Experiencing Depression?", options=["No", "Yes"], horizontal=True)
-        anxiety = st.radio("Experiencing Anxiety?", options=["No", "Yes"], horizontal=True)
-        panic_attack = st.radio("Experiencing Panic Attacks?", options=["No", "Yes"], horizontal=True)
-        symptom_freq = st.slider(
-            "Symptom Days in Last 7 Days", min_value=0, max_value=7, value=3,
-            help="How many of the last 7 days did you experience mental health symptoms?"
-        )
+        daily_study_hours = st.slider("Daily Study Hours", min_value=0.0, max_value=24.0, value=4.0, step=0.5)
+        daily_sleep_hours = st.slider("Daily Sleep Hours", min_value=0.0, max_value=24.0, value=7.0, step=0.5)
+        screen_time_hours = st.slider("Screen Time Hours", min_value=0.0, max_value=24.0, value=6.0, step=0.5)
 
     with col5:
-        sleep_quality = st.slider(
-            "Sleep Quality (1=Very Poor, 5=Excellent)", min_value=1, max_value=5, value=3
-        )
-        study_stress = st.slider(
-            "Study Stress Level (1=Very Low, 5=Very High)", min_value=1, max_value=5, value=3
-        )
+        physical_activity_hours = st.slider("Physical Activity Hours", min_value=0.0, max_value=12.0, value=1.0, step=0.1)
+        anxiety_score = st.slider("Anxiety Score (0-10)", min_value=0, max_value=10, value=5)
+        depression_score = st.slider("Depression Score (0-10)", min_value=0, max_value=10, value=5)
 
     submitted = st.form_submit_button("Predict My Burnout Risk", use_container_width=True, type="primary")
 
 # ── Prediction ────────────────────────────────────────────────────────────────
 if submitted:
-    # Convert radio button values
-    def yn_to_int(val): return 1 if val == "Yes" else 0
-
     input_dict = build_input_dict(
         gender=gender,
         age=int(age),
         course=course.strip().title(),
-        year_of_study=year_of_study,
-        cgpa=float(cgpa) / 10.0 * 4.0,  
-        depression=yn_to_int(depression),
-        anxiety=yn_to_int(anxiety),
-        panic_attack=yn_to_int(panic_attack),
-        specialist_treatment=yn_to_int(specialist_treatment),
-        symptom_frequency=int(symptom_freq),
-        has_mental_health_support=yn_to_int(has_support),
-        sleep_quality=int(sleep_quality),
-        study_stress_level=int(study_stress),
-        study_hours_per_week=int(study_hours),
-        academic_engagement=int(academic_engagement),
+        year=year,
+        daily_study_hours=float(daily_study_hours),
+        daily_sleep_hours=float(daily_sleep_hours),
+        screen_time_hours=float(screen_time_hours),
+        stress_level=stress_level,
+        anxiety_score=int(anxiety_score),
+        depression_score=int(depression_score),
+        academic_pressure_score=int(academic_pressure_score),
+        financial_stress_score=int(financial_stress_score),
+        social_support_score=int(social_support_score),
+        physical_activity_hours=float(physical_activity_hours),
+        sleep_quality=sleep_quality,
+        attendance_percentage=float(attendance_percentage),
+        cgpa=float(cgpa),
+        internet_quality=internet_quality,
     )
 
     with st.spinner("Analysing your inputs..."):

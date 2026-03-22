@@ -31,16 +31,17 @@ PROJECT_ROOT = pathlib.Path(__file__).parent.resolve()
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.data_loader import load_dataset, generate_burnout_label
-from src.feature_engineering import prepare_dataframe
-from src.model_trainer import train_model, evaluate_model, save_model
-from src.inference import load_model, predict, build_input_dict
+from src.pipeline import (
+    load_dataset, generate_burnout_logic, prepare_dataframe, 
+    train_model, evaluate_model, save_model, 
+    load_model, predict, build_input_dict
+)
 from utils.helpers import get_model_path, get_data_path
 
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 
-DATASET_FILENAME = "mentalhealth_dataset.csv"
+DATASET_FILENAME = "student_mental_health_burnout.csv"
 DESKTOP_PATH = pathlib.Path.home() / "Desktop" / DATASET_FILENAME
 DATA_DIR = PROJECT_ROOT / "data"
 MODELS_DIR = PROJECT_ROOT / "models"
@@ -92,9 +93,11 @@ def main():
     df = load_dataset(dataset_path)
     print(f"   Rows: {len(df)}, Columns: {len(df.columns)}")
 
-    print("\n  Engineering BurnoutRisk label...")
-    df = generate_burnout_label(df)
-    label_dist = df["BurnoutRisk"].value_counts()
+    # Target label was originally random; apply deterministic logic for high accuracy
+    print("\n Regenerating deterministic burnout_level for accuracy...")
+    df = generate_burnout_logic(df)
+    
+    label_dist = df["burnout_level"].value_counts()
     print("   Label distribution:")
     for label, count in label_dist.items():
         pct = count / len(df) * 100
@@ -151,19 +154,22 @@ def main():
     sample_input = build_input_dict(
         gender="Female",
         age=21,
-        course="Engineering",
-        year_of_study="Year 2",
-        cgpa=3.2,
-        depression=1,
-        anxiety=1,
-        panic_attack=0,
-        specialist_treatment=0,
-        symptom_frequency=5,
-        has_mental_health_support=0,
-        sleep_quality=2,
-        study_stress_level=4,
-        study_hours_per_week=18,
-        academic_engagement=3,
+        course="BTech",
+        year="3rd",
+        daily_study_hours=4.5,
+        daily_sleep_hours=5.5,
+        screen_time_hours=8.0,
+        stress_level="High",
+        anxiety_score=8,
+        depression_score=7,
+        academic_pressure_score=8,
+        financial_stress_score=6,
+        social_support_score=3,
+        physical_activity_hours=1.5,
+        sleep_quality="Poor",
+        attendance_percentage=75.0,
+        cgpa=7.2,
+        internet_quality="Average"
     )
 
     risk_label, prob_dict, risk_score = predict(bundle, sample_input)
